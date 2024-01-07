@@ -1,0 +1,141 @@
+.tableFixHead          { overflow: auto; height: 100px; }
+.tableFixHead thead th { position: sticky; top: 0; z-index: 1; }
+
+/* Just common table stuff. Really. */
+.te_table table  { border-collapse: collapse; width: 100%; }
+.te_table th, td { padding: 8px 16px; }
+.te_table th     { background:#eee; }
+
+
+.te_table table {
+    background-color: rgb(9, 121, 121);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+
+}
+
+.te_submitted{
+    width: 200px;
+    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto Thin', sans-serif;
+    font-family: 'Roboto Light', sans-serif;
+    font-family: 'Roboto Medium', sans-serif;
+    font-family: 'Roboto Black', sans-serif;
+}
+/* make table look good */
+.te_table table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-radius: 3px;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+
+    /* set width to fraction of view width */
+    width: 550px;    
+    table-layout: fixed;
+    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto Thin', sans-serif;
+    font-family: 'Roboto Light', sans-serif;
+    font-family: 'Roboto Medium', sans-serif;
+    font-family: 'Roboto Black', sans-serif;
+}
+.te_table tr {
+    background-color: #f1ecec;
+}
+.te_table tr:hover{
+    background-color:  #ffffffa1;
+}
+.te_table td {
+    text-align: center;
+}
+.te_table th {
+    color: white;
+    font-style: "Roboto";
+    font-size: small;
+    background-color: rgb(31,39,57);
+}
+#copy-to-clipboard:hover{
+    font-weight: bold;
+    cursor: pointer;
+
+}
+
+/* good looking submit button that floats on page */
+
+.submit-button {
+    background-color: #1f2739;
+    border: none;
+    color: white;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 0px;
+    float: right;
+}
+.submit-button:hover {
+    background-color: rgb(43, 52, 73);
+    border: none;
+    color: white;
+
+}
+
+td.item {
+    text-align: left;
+    font-weight: bold;
+}
+td.image {
+    /* set image size */
+    text-align: center;
+    /* center image within this class */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0px;
+
+}
+td.image img {
+    /* set image size */
+    max-width: 60px;
+
+}
+
+
+td.profit {
+    color: green;
+}
+
+.profit-display {
+    color: green;
+}
+
+.total-price-info{
+    font-size: 11px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    padding: 10px 10px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 0px;
+    float: right;
+}
+.total-profit-info {
+    font-size: 11px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    padding: 10px 10px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 0px;
+    float: right;
+}

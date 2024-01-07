@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "Torn Exchange",
+    "version": "2.0",
+    "description": "For Torn traders that use Torn Exchange for their price list. You can now also use TE message templates!",
+    "offline_enabled": true,
+    "background":{
+      "service_worker": "background.js"
+    },
+    "icons":{
+      "128": "images/icon.png"
+    },
+    "content_scripts": [{
+      "matches": ["*://*.torn.com/*"],
+      "js": ["scripts/content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }],
+
+    "host_permissions": ["*://*.torn.com/*","https://www.tornexchange.com/*"],
+  
+    "action": {
+      "default_icon": "images/icon.png",
+      "default_title": "Torn Exchange",
+      "default_popup": "popup.html"
+    }
+}
