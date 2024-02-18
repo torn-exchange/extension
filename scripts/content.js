@@ -48,7 +48,7 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
         
         const regex_splitter = /\sx(?=\d{1,10})/
         let trade_elements = document.querySelectorAll("#trade-container > div.trade-cont.m-top10 > div.user.right > ul > li > ul > li > div.name.left")
-        // console.log(trade_elements);
+
         for (let i=0; i<trade_elements.length; i++){
 
             // if string is not  '' or ' '
@@ -74,7 +74,7 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
         }
 
         responseData = getPricesFromPlayerApi(items, quantities, sellerName, userName);
-        // console.log(responseData);
+        
         var domInfo = {
             buyer_name: responseData.buyer_name,
             image_url: responseData.image_url,

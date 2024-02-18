@@ -140,22 +140,9 @@ td.profit {
     float: right;
 }
 
-.copy-text a:link {
-    text-decoration: none;
-    color: inherit;
-}
-
-.copy-text a:visited {
-    text-decoration: none;
-    color: inherit;
-}
-
-.copy-text a:hover {
-    text-decoration: none;
-    color: inherit;
-}
-
+.copy-text a:link,
+.copy-text a:visited,
+.copy-text a:hover,
 .copy-text a:active {
     text-decoration: none;
-    color: inherit;
 }

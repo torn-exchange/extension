@@ -224,11 +224,10 @@ function render_response(response_data) {
     let copy_to_clipboard_total = document.getElementById('copy-to-clipboard-total');
     let total_text = response_data['total'].toString();
     copy_to_clipboard_total.addEventListener('click', function () {
-        writeToClipboard(total_text, (error, result) => {
+        writeToClipboard(total_text, (error) => {
             if (error) {
-              console.error('Error:', error);
+              window.prompt("Copy to clipboard: Ctrl+C, Enter", response_text);
             } else {
-              console.log('Result:', result);
               const backup = copy_to_clipboard_total.innerHTML;
               copy_to_clipboard_total.innerHTML = "Copied!"
               setTimeout(() => {
