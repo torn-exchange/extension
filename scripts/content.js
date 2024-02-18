@@ -48,28 +48,33 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
         
         const regex_splitter = /\sx(?=\d{1,10})/
         let trade_elements = document.querySelectorAll("#trade-container > div.trade-cont.m-top10 > div.user.right > ul > li > ul > li > div.name.left")
-        console.log(trade_elements);
+        // console.log(trade_elements);
         for (let i=0; i<trade_elements.length; i++){
 
             // if string is not  '' or ' '
             if ((trade_elements[i].textContent) && (trade_elements[i].textContent.trim() !== ''))  {
                
                 let textContent = trade_elements[i].textContent.split(regex_splitter);
-                console.log(textContent);
                 
                 if (textContent.length == 2){
                     items.push(sanitizeItemName(textContent[0]));
                     quantities.push(parseInt(sanitizeItemName(textContent[1])));
                 }
                 else if (textContent.length == 1){
-                    items.push(sanitizeItemName(textContent[0]));
+                    const sanitized = sanitizeItemName(textContent[0]);
+                    if (sanitized == "No items in trade") {
+                        alert("No items in trade or trade already finished.");
+                        throw new Error("No items in trade or trade already finished.");
+                    }
+
+                    items.push(sanitized);
                     quantities.push(1);
                 }
             }
         }
 
         responseData = getPricesFromPlayerApi(items, quantities, sellerName, userName);
-        console.log(responseData);
+        // console.log(responseData);
         var domInfo = {
             buyer_name: responseData.buyer_name,
             image_url: responseData.image_url,

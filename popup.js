@@ -38,7 +38,10 @@ function addSubmitButtonToTable(table) {
     submit_text.innerHTML = getSubmitText(table);
 
     submit_div.appendChild(submit_text);
-    content.appendChild(submit_div);
+
+    // fix: on mobile when having lots of items in a trade the div would get sticky 
+    // and hide submit button, so we move it above the items table
+    content.prepend(submit_div);
 }
 
 function getSubmitText(table) {
@@ -189,25 +192,50 @@ function submitTrade(info) {
 
 function render_response(response_data) {
     let response_div = document.getElementById('torn-exchange-content');
+
     response_div.innerHTML = `
     <div class="response te_submitted">
     <hr>
         <h4>Trade Submitted \✅ </h4>
-        <p id='copy-to-clipboard-total'><b>Total: </b>${formatPrice(response_data['total'])} 🔥 </p>
+        <p id='copy-to-clipboard-total' class='copy-text'><a href="#" title='Click to copy to clipboard'><span>📝 </span></a><b>Total: </b>${formatPrice(response_data['total'])} 🔥 </p>
 
-        <p><a style="color:'black';" href="https://tornexchange.com/receipt/${response_data['receipt_id']}"><b>Receipt</b></a></p>
-        <p id='copy-to-clipboard'>Receipt Message 💭</p>
+        <p><a href="https://tornexchange.com/receipt/${response_data['receipt_id']}" target="_blank"><b>Receipt</b></a></p>
+        <p id='copy-to-clipboard' class='copy-text'><a href="#" title='Click to copy to clipboard'>Receipt Message 💭</a></p>
     </div>
     `;
+
     let response_text = htmlDecode(response_data['trade_message']);
     let copy_to_clipboard = document.getElementById('copy-to-clipboard');
     copy_to_clipboard.addEventListener('click', function () {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", response_text);
+        writeToClipboard(response_text, (error, result) => {
+            if (error) {
+              console.error('Error:', error);
+            } else {
+              console.log('Result:', result);
+              const backup = copy_to_clipboard.innerHTML;
+              copy_to_clipboard.innerHTML = "Copied!"
+              setTimeout(() => {
+                copy_to_clipboard.innerHTML = backup;
+              }, 1500);
+            }
+          });
     })
+
     let copy_to_clipboard_total = document.getElementById('copy-to-clipboard-total');
     let total_text = response_data['total'].toString();
     copy_to_clipboard_total.addEventListener('click', function () {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", total_text);
+        writeToClipboard(total_text, (error, result) => {
+            if (error) {
+              console.error('Error:', error);
+            } else {
+              console.log('Result:', result);
+              const backup = copy_to_clipboard_total.innerHTML;
+              copy_to_clipboard_total.innerHTML = "Copied!"
+              setTimeout(() => {
+                copy_to_clipboard_total.innerHTML = backup;
+              }, 1500);
+            }
+          });
     })
 }
 
@@ -231,3 +259,40 @@ function formatPrice(price) {
         return "$" + price;
     }
 }
+
+function writeToClipboard(textToCopy, callback) {
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => {
+        // Clipboard write succeeded
+        if (callback) {
+          callback(null, 'Text copied to clipboard successfully.');
+        }
+      })
+      .catch((err) => {
+        // Clipboard write failed
+        if (callback) {
+          callback(err, 'Failed to copy text to clipboard.');
+        }
+      });
+  }
+
+function copyToClipboardOld(text) {
+    if (window.clipboardData && window.clipboardData.setData) {
+        // IE specific code path to prevent textarea being shown while dialog is visible.
+        return clipboardData.setData("Text", text); 
+  
+    } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+        var textarea = document.createElement("textarea");
+        textarea.textContent = text;
+        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+        } catch (ex) {
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+  }
