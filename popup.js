@@ -2,16 +2,15 @@ const ENDPOINT = "https://www.tornexchange.com";
 
 // Update the relevant fields with the new data.
 const setDOMInfo = info => {
+    info.buyer_name;
+    info.image_url;
     info.items;
-    info.quantities;
-    info.seller_name;
-    info.traderID;
     info.market_prices;
     info.prices;
     info.profit_per_item;
-    info.image_url;
-    info.buyer_name;
-    console.log(info)
+    info.quantities;
+    info.seller_name;
+    info.traderID;
     table = createTable(info);
     addSubmitButtonToTable(table);
     activateSubmitButton(info);
@@ -57,7 +56,7 @@ function getSubmitText(table) {
         total_price += parseFloat(prices[i].innerText);
         total_profit += (parseFloat(market_prices[i].innerText) - parseFloat(prices[i].innerText)) * parseInt(quantities[i].innerText);
     }
-    
+
     // display total price and total profit in nice html format
     return `<p class='total-price-info'>Total Price: <span class='profit-display'>` + formatPrice(total_price) + `</span></p><p class= 'total-profit-info'> Total Profit:  <span class='profit-display'>` + formatPrice(total_profit) + `</span></p>`;
 }
@@ -211,13 +210,13 @@ function render_response(response_data) {
             if (error) {
                 window.prompt("Copy to clipboard: Ctrl+C, Enter", response_text);
             } else {
-              const backup = copy_to_clipboard.innerHTML;
-              copy_to_clipboard.innerHTML = "Copied!"
-              setTimeout(() => {
-                copy_to_clipboard.innerHTML = backup;
-              }, 1500);
+                const backup = copy_to_clipboard.innerHTML;
+                copy_to_clipboard.innerHTML = "Copied!"
+                setTimeout(() => {
+                    copy_to_clipboard.innerHTML = backup;
+                }, 1500);
             }
-          });
+        });
     })
 
     let copy_to_clipboard_total = document.getElementById('copy-to-clipboard-total');
@@ -225,15 +224,15 @@ function render_response(response_data) {
     copy_to_clipboard_total.addEventListener('click', function () {
         writeToClipboard(total_text, (error) => {
             if (error) {
-              window.prompt("Copy to clipboard: Ctrl+C, Enter", response_text);
+                window.prompt("Copy to clipboard: Ctrl+C, Enter", response_text);
             } else {
-              const backup = copy_to_clipboard_total.innerHTML;
-              copy_to_clipboard_total.innerHTML = "Copied!"
-              setTimeout(() => {
-                copy_to_clipboard_total.innerHTML = backup;
-              }, 1500);
+                const backup = copy_to_clipboard_total.innerHTML;
+                copy_to_clipboard_total.innerHTML = "Copied!"
+                setTimeout(() => {
+                    copy_to_clipboard_total.innerHTML = backup;
+                }, 1500);
             }
-          });
+        });
     })
 }
 
@@ -260,16 +259,16 @@ function formatPrice(price) {
 
 function writeToClipboard(textToCopy, callback) {
     navigator.clipboard.writeText(textToCopy)
-      .then(() => {
-        // Clipboard write succeeded
-        if (callback) {
-          callback(null, 'Text copied to clipboard successfully.');
-        }
-      })
-      .catch((err) => {
-        // Clipboard write failed
-        if (callback) {
-          callback(err, 'Failed to copy text to clipboard.');
-        }
-      });
-  }
+        .then(() => {
+            // Clipboard write succeeded
+            if (callback) {
+                callback(null, 'Text copied to clipboard successfully.');
+            }
+        })
+        .catch((err) => {
+            // Clipboard write failed
+            if (callback) {
+                callback(err, 'Failed to copy text to clipboard.');
+            }
+        });
+}
