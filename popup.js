@@ -203,7 +203,7 @@ function render_response(response_data) {
     </div>
     `;
 
-    let response_text = htmlDecode(response_data['trade_message']);
+    let response_text = formatTemplateNumbers(response_data['trade_message']);
     let copy_to_clipboard = document.getElementById('copy-to-clipboard');
     copy_to_clipboard.addEventListener('click', function () {
         writeToClipboard(response_text, (error) => {
@@ -271,4 +271,27 @@ function writeToClipboard(textToCopy, callback) {
                 callback(err, 'Failed to copy text to clipboard.');
             }
         });
+}
+
+/**
+ * This function takes trader's template message as a parameter,
+ * searches for a price number and formats it with commas for easier read.
+ * @param {*} inputString template message from server
+ * @returns template message with formatted prices
+ */
+function formatTemplateNumbers(inputString) {
+    inputString = htmlDecode(inputString);
+    
+    // Regular expression to match numbers preceded by a dollar sign
+    var pattern = /\$\d+(,\d{3})*(?:\.\d+)?/g;
+
+    // Replace matched numbers with commas
+    var formattedString = inputString.replace(pattern, function(match) {
+        // Remove dollar sign and commas from the match
+        var number = match.replace(/\$|,/g, '');
+        // Format the number with commas
+        return '$' + parseFloat(number).toLocaleString();
+    });
+
+    return formattedString;
 }

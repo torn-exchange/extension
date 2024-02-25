@@ -68,6 +68,11 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
                 }
             }
 
+            if (quantities.length == 0) {
+                alert("No items in trade!");
+                throw new Error("No items in trade!");
+            }
+
             responseData = getPricesFromPlayerApi(items, quantities, sellerName, userName);
 
             var domInfo = {
