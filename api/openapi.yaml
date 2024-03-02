@@ -1,0 +1,227 @@
+openapi: 3.0.0
+info:
+  title: Your API
+  version: 1.0.0
+paths:
+  /new_extension_get_prices:
+    post:
+      summary: Check trader prices
+      description: Endpoint description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetPricesRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPricesResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /new_create_receipt:
+    post:
+      summary: Create a receipt
+      description: Endpoint description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReceiptRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateReceiptResponse'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    GetPricesRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          description: List of items being purchased
+          items:
+            type: string
+          example:
+            - Xanax
+            - Flash Grenade
+        quantities:
+          type: array
+          description: Corresponding quantities of items
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 10
+            - 5
+        user_name:
+          type: string
+          description: Name of the user making the purchase
+          example: Trader
+        seller_name:
+          type: string
+          description: Name of the seller
+          example: Seller
+      required:
+        - items
+        - quantities
+        - user_name
+        - seller_name
+    GetPricesResponse:
+      type: object
+      properties:
+        seller_name:
+          type: string
+          description: Name of the seller
+          example: Seller
+        buyer_name:
+          type: string
+          description: Name of the buyer
+          example: Trader
+        items:
+          type: array
+          description: List of items purchased
+          items:
+            type: string
+          example:
+            - Xanax
+            - Flash Grenade
+        quantities:
+          type: array
+          description: Corresponding quantities of items purchased
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 10
+            - 5
+        prices:
+          type: array
+          description: Prices of each item purchased
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 840958
+            - 23666
+        profit_per_item:
+          type: array
+          description: Profit per item
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 8420
+            - 3660
+        image_url:
+          type: array
+          description: URLs of images for each item
+          items:
+            type: string
+            format: uri
+          example:
+            - https://www.tornexchange.com/images/items/206/large.png
+            - https://www.tornexchange.com/images/items/222/large.png
+        market_prices:
+          type: array
+          description: Market prices for each item
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 841800
+            - 24398
+      required:
+        - seller_name
+        - buyer_name
+        - items
+        - quantities
+        - prices
+        - profit_per_item
+        - image_url
+        - market_prices
+    CreateReceiptRequest:
+      type: object
+      properties:
+        owner_username:
+          type: string
+          description: Username of the owner
+          example: Trader
+        owner_user_id:
+          type: integer
+          description: ID of the owner
+          example: 256
+        seller_username:
+          type: string
+          description: Username of the seller
+          example: Seller
+        prices:
+          type: array
+          description: Prices of items
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 840958
+            - 23666
+        item_quantities:
+          type: array
+          description: Quantities of items
+          items:
+            type: integer
+            minimum: 0
+          example:
+            - 10
+            - 5
+        item_names:
+          type: array
+          description: Names of items
+          items:
+            type: string
+          example:
+            - Xanax
+            - Flash Grenade
+      required:
+        - owner_username
+        - owner_user_id
+        - seller_username
+        - prices
+        - item_quantities
+        - item_names
+    CreateReceiptResponse:
+      type: object
+      properties:
+        receipt_id:
+          type: string
+          description: Unique identifier for the receipt
+          example: 11TU0890tV
+        trade_message:
+          type: string
+          description: A message related to the trade
+          example: Some message
+        profit:
+          type: integer
+          description: Profit from the trade
+          example: -4805
+        total:
+          type: integer
+          description: Total amount of the trade
+          example: 8527910
+      required:
+        - receipt_id
+        - trade_message
+        - profit
+        - total
