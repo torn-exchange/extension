@@ -1,0 +1,73 @@
+{
+	"info": {
+		"_postman_id": "466a8358-8b7e-400c-b382-300970340719",
+		"name": "TE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33339244"
+	},
+	"item": [
+		{
+			"name": "Get Prices",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json; charset=UTF-8",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"items\": [\r\n        \"Xanax\"\r\n    ],\r\n    \"quantities\": [\r\n        1\r\n    ],\r\n    \"user_name\": \"Ata\",\r\n    \"seller_name\": \"\"\r\n}"
+				},
+				"url": {
+					"raw": "https://tornexchange.com/new_extension_get_prices",
+					"protocol": "https",
+					"host": [
+						"tornexchange",
+						"com"
+					],
+					"path": [
+						"new_extension_get_prices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Receipt",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json; charset=UTF-8",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"owner_username\": \"Ata\",\r\n    \"owner_user_id\": 2507441,\r\n    \"seller_username\": \"PPrincess\",\r\n    \"prices\": [\r\n        840958,\r\n        23666\r\n    ],\r\n    \"item_quantities\": [\r\n        10,\r\n        5\r\n    ],\r\n    \"item_names\": [\r\n        \"Xanax\",\r\n        \"Flash Grenade\"\r\n    ]\r\n}"
+				},
+				"url": {
+					"raw": "https://tornexchange.com/new_create_receipt",
+					"protocol": "https",
+					"host": [
+						"tornexchange",
+						"com"
+					],
+					"path": [
+						"new_create_receipt"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
