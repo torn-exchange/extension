@@ -25,10 +25,9 @@ function sanitizeItemName(itemName) {
     const TTregex = /\$.*/;
     let sanitized = itemName.replace(TTregex, '').trim().replaceAll('\n', '');
     return sanitized;
-
 }
 
-chrome.runtime.onMessage.addListener((msg, sender, response) => {
+chrome.runtime.onMessage.addListener(async (msg, sender, response) => {
     // First, validate the message's structure.
     if ((msg.from === 'popup') && (msg.subject === 'DOMInfo')) {
         // Collect the necessary data. 
@@ -73,7 +72,10 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
                 throw new Error("No items in trade!");
             }
 
-            responseData = getPricesFromPlayerApi(items, quantities, sellerName, userName);
+            const responseData = await getPricesFromPlayerApi(items, quantities, sellerName, userName);
+            if(!responseData) {
+                alert("Could not resolve item prices")
+            }
 
             var domInfo = {
                 buyer_name: responseData.buyer_name,
@@ -85,31 +87,35 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
                 quantities: responseData.quantities,
                 seller_name: responseData.seller_name,
             };
-
         }
 
         // Directly respond to the sender (popup), 
         // through the specified callback.
-        response(domInfo);
+        console.log('domInfo', domInfo)
+        return domInfo;
     }
 });
 
+async function getPricesFromPlayerApi(items, quantities, sellerName, userName) {
+    const data = {
+        items: items,
+        quantities: quantities,
+        user_name: userName,
+        seller_name: sellerName
+    };
 
-function getPricesFromPlayerApi(items, quantities, sellerName, userName) {
-    var data = {
-        "items": items,
-        "quantities": quantities,
-        "user_name": userName,
-        "seller_name": sellerName
-    }
-    data = JSON.stringify(data);
-    let url = ENDPOINT + '/new_extension_get_prices'
-    let request = new XMLHttpRequest();
-
-    request.open('POST', url, false);
-    request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    request.send(data);
-    var responseData = JSON.parse(request.response);
-
-    return responseData
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({
+            from: 'content',
+            subject: 'getPrices',
+            data: data
+        }, (response) => {
+            if (response.error) {
+                console.error('Error fetching prices:', response.error);
+                reject(response.error);
+            } else {
+                resolve(response);
+            }
+        });
+    });
 }

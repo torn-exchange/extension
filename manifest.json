@@ -3,7 +3,6 @@
     "name": "Torn Exchange",
     "version": "2.2",
     "description": "For Torn traders that use Torn Exchange for their price list. You can now also use TE message templates!",
-    "offline_enabled": true,
     "background":{
       "scripts": ["background.js"]
     },
