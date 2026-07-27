@@ -6,3 +6,5 @@ Chrome Webstore: [https://chromewebstore.google.com/detail/torn-exchange/iggcinp
 
 Firefox Add-on:
 [https://addons.mozilla.org/en-GB/firefox/addon/torn-exchange-2-0/](https://addons.mozilla.org/en-GB/firefox/addon/torn-exchange-2-0/)
+
+This branch serves as an archive for deprecated TE browser extension.
