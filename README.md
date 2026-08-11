@@ -13,6 +13,8 @@ Adds a Torn Exchange price lookup and receipt tool directly to your Torn trade p
 
 ## Setup
 
+Homepage: [https://greasyfork.org/en/scripts/588688-torn-exchange-helper](https://greasyfork.org/en/scripts/588688-torn-exchange-helper)
+
 On first use, you'll be asked for your Torn API key (the same one you use to log into Torn Exchange) — this is stored locally by the script and only sent to Torn Exchange to look up your receipts.
 
 ## Requirements
