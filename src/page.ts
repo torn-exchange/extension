@@ -1,7 +1,7 @@
 import { getApiKey, showApiKeyPrompt } from './auth';
 import { fetchReceiptByTradeId } from './api';
 import { getUsernameFromTradePage } from './dom-scrape';
-import { setup, showLookupButton, renderReceipt, showLoader, getWrapper } from './ui';
+import { setup, showLookupButton, renderReceipt, showLoader, showLookupError, getWrapper, setSettingsHandler } from './ui';
 
 export function isTradePage(): boolean {
   const hash = location.hash;
@@ -30,7 +30,13 @@ export function observeElement(selector: string, callback: (element: Element) =>
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
+function showSettings(): void {
+  showApiKeyPrompt(getWrapper(), handleTradePage, getApiKey());
+}
+
 export function handleTradePage(): void {
+  setSettingsHandler(showSettings);
+
   if (!getApiKey()) {
     showApiKeyPrompt(getWrapper(), handleTradePage);
     return;
@@ -47,6 +53,8 @@ export function handleTradePage(): void {
   fetchReceiptByTradeId(tradeId, function (error, existingReceipt) {
     if (error) {
       console.error('Error checking for existing receipt:', error);
+      showLookupError('Could not check for an existing receipt. Click the cog icon to update your API key, or reload to try again.');
+      return;
     }
 
     if (existingReceipt) {

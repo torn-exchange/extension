@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite';
 import monkey from 'vite-plugin-monkey';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
 
 export default defineConfig({
   plugins: [
@@ -8,7 +11,7 @@ export default defineConfig({
       userscript: {
         name: 'Torn Exchange Helper',
         namespace: 'te.helper',
-        version: '1.0.0',
+        version: pkg.version,
         author: 'Ata [2507441]',
         description:
           'TornExchange Helper Script for traders - finish trades and create trade receipts on the fly',

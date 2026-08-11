@@ -12,12 +12,17 @@ interface TeState {
 }
 
 let state: TeState | null = null;
+let onSettingsClick: (() => void) | null = null;
 
 export function getWrapper(): HTMLElement {
   if (!state) {
     throw new Error('te-helper UI not set up yet');
   }
   return state.wrapper;
+}
+
+export function setSettingsHandler(handler: () => void): void {
+  onSettingsClick = handler;
 }
 
 export function setup(): HTMLElement | null {
@@ -37,13 +42,24 @@ export function setup(): HTMLElement | null {
 
   const header = document.createElement('div');
   header.className = 'te_header';
+  header.style.position = 'relative';
 
   const teImg = document.createElement('img');
   teImg.className = 'te_header_image';
   teImg.src = 'https://tornexchange.com/static/main/images/mainlogo.png';
   teImg.alt = 'Header Image';
 
+  const settingsButton = document.createElement('button');
+  settingsButton.className = 'te_settings_button';
+  settingsButton.title = 'Update API key';
+  settingsButton.setAttribute('aria-label', 'Settings');
+  settingsButton.textContent = '⚙';
+  settingsButton.addEventListener('click', function () {
+    onSettingsClick?.();
+  });
+
   header.appendChild(teImg);
+  header.appendChild(settingsButton);
   contents.appendChild(header);
   contents.appendChild(wrapper);
   container.appendChild(contents);

@@ -3,6 +3,16 @@ import { getApiKey } from './auth';
 
 export const ENDPOINT = 'https://tornexchange.com';
 
+const REQUEST_TIMEOUT_MS = 15000;
+
+function safeJsonParse<T>(text: string): T | null {
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 export function fetchPrices(
   items: string[],
   quantities: number[],
@@ -24,11 +34,20 @@ export function fetchPrices(
       'Content-Type': 'application/json; charset=UTF-8',
     },
     data,
+    timeout: REQUEST_TIMEOUT_MS,
     onload: function (response) {
-      callback(null, JSON.parse(response.responseText));
+      const parsed = safeJsonParse<PriceData>(response.responseText);
+      if (!parsed) {
+        callback(new Error('Invalid response from server.'), null);
+        return;
+      }
+      callback(null, parsed);
     },
     onerror: function (error) {
       callback(error, null);
+    },
+    ontimeout: function () {
+      callback(new Error('Request timed out.'), null);
     },
   });
 }
@@ -40,15 +59,28 @@ export function fetchReceiptByTradeId(
   GM_xmlhttpRequest({
     method: 'GET',
     url: ENDPOINT + '/api/receipt_by_trade_id/' + tradeId + '?key=' + encodeURIComponent(getApiKey() ?? ''),
+    timeout: REQUEST_TIMEOUT_MS,
     onload: function (response) {
       if (response.status === 404) {
         callback(null, null);
         return;
       }
-      callback(null, JSON.parse(response.responseText));
+      if (response.status < 200 || response.status >= 300) {
+        callback(new Error('Request failed with status ' + response.status), null);
+        return;
+      }
+      const parsed = safeJsonParse<ExistingReceipt>(response.responseText);
+      if (!parsed) {
+        callback(new Error('Invalid response from server.'), null);
+        return;
+      }
+      callback(null, parsed);
     },
     onerror: function (error) {
       callback(error, null);
+    },
+    ontimeout: function () {
+      callback(new Error('Request timed out.'), null);
     },
   });
 }
@@ -80,11 +112,20 @@ export function submitReceipt(
       'Content-Type': 'application/json; charset=UTF-8',
     },
     data,
+    timeout: REQUEST_TIMEOUT_MS,
     onload: function (response) {
-      callback(null, JSON.parse(response.responseText));
+      const parsed = safeJsonParse<ReceiptResponse>(response.responseText);
+      if (!parsed) {
+        callback(new Error('Invalid response from server.'), null);
+        return;
+      }
+      callback(null, parsed);
     },
     onerror: function (error) {
       callback(error, null);
+    },
+    ontimeout: function () {
+      callback(new Error('Request timed out.'), null);
     },
   });
 }

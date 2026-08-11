@@ -55,6 +55,24 @@ export const CSS = `
         background-color: #373737;
     }
 
+    .te_settings_button {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #a0a0a0;
+        font-size: 16px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 4px;
+    }
+
+    .te_settings_button:hover {
+        color: #f7b84b;
+    }
+
     div.te_wrapper {
         padding:10px;
     }
