@@ -14,14 +14,14 @@ export function getTradeId(): string | null {
 }
 
 export function observeElement(selector: string, callback: (element: Element) => void = () => {}): void {
-  const observer = new MutationObserver((_mutations, obs) => {
-    let element: Element | null = null;
-    if (selector.startsWith('#')) {
-      element = document.getElementById(selector.slice(1));
-    } else if (selector.startsWith('.')) {
-      element = document.querySelector(selector);
-    }
+  const existing = document.querySelector(selector);
+  if (existing) {
+    callback(existing);
+    return;
+  }
 
+  const observer = new MutationObserver((_mutations, obs) => {
+    const element = document.querySelector(selector);
     if (element) {
       callback(element);
       obs.disconnect();
@@ -97,5 +97,61 @@ export function handlePage(): void {
     if (container) {
       handleTradePage();
     }
+  });
+}
+
+const TE_URL_PATTERN = /https:\/\/tornexchange\.com\/\S+/g;
+
+function linkifyTornExchangeUrls(node: Node): void {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent ?? '';
+    if (!TE_URL_PATTERN.test(text)) {
+      return;
+    }
+    TE_URL_PATTERN.lastIndex = 0;
+
+    const fragment = document.createDocumentFragment();
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = TE_URL_PATTERN.exec(text))) {
+      if (match.index > lastIndex) {
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+      }
+      const link = document.createElement('a');
+      link.href = match[0];
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = match[0];
+      fragment.appendChild(link);
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < text.length) {
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    node.parentNode?.replaceChild(fragment, node);
+    return;
+  }
+
+  if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName !== 'A') {
+    Array.from(node.childNodes).forEach(linkifyTornExchangeUrls);
+  }
+}
+
+export function observeTradeLog(): void {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === 'LI') {
+          linkifyTornExchangeUrls(node);
+        }
+      });
+    }
+  });
+
+  observeElement('ul.log', function (log) {
+    Array.from(log.children).forEach((li) => linkifyTornExchangeUrls(li));
+    observer.observe(log, { childList: true });
   });
 }
