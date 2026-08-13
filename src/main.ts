@@ -1,5 +1,5 @@
 import { CSS } from './styles';
-import { handlePage } from './page';
+import { handlePage, observeTradeLog } from './page';
 
 GM_addStyle(CSS);
 
@@ -14,4 +14,5 @@ if (!window.teHelperHasInitialized) {
 
   window.addEventListener('hashchange', handlePage);
   handlePage();
+  observeTradeLog();
 }

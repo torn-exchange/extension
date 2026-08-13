@@ -308,30 +308,83 @@ export function renderReceipt(receipt: Receipt): void {
   wrapper.appendChild(copyTotalButton);
   wrapper.appendChild(receiptLink);
 
+  const receiptUrl = receiptLink.href;
+  receiptButton.innerText = 'Copy receipt';
+  receiptButton.addEventListener('click', function (event) {
+    event.preventDefault();
+    writeToClipboard(receiptUrl, (error) => {
+      if (error) {
+        window.prompt('Copy to clipboard: Ctrl+C, Enter', receiptUrl);
+      } else {
+        const backup = receiptButton.innerText;
+        receiptButton.innerText = 'Copied!';
+        setTimeout(() => {
+          receiptButton.innerText = backup;
+        }, 1500);
+      }
+    });
+  });
+
+  let copyMessageButton: HTMLButtonElement | null = null;
+  let responseText = '';
+
   if (receipt.trade_message) {
-    const copyMessageButton = document.createElement('button');
+    copyMessageButton = document.createElement('button');
     copyMessageButton.className = 'te_button';
     copyMessageButton.innerText = 'Copy Receipt Message';
     copyMessageButton.style.marginRight = '8px';
     wrapper.appendChild(copyMessageButton);
 
-    const responseText = formatTemplateNumbers(receipt.trade_message);
+    responseText = formatTemplateNumbers(receipt.trade_message);
     copyMessageButton.addEventListener('click', function () {
       writeToClipboard(responseText, (error) => {
         if (error) {
           window.prompt('Copy to clipboard: Ctrl+C, Enter', responseText);
         } else {
-          const backup = copyMessageButton.innerText;
-          copyMessageButton.innerText = 'Copied!';
+          const backup = copyMessageButton!.innerText;
+          copyMessageButton!.innerText = 'Copied!';
           setTimeout(() => {
-            copyMessageButton.innerText = backup;
+            copyMessageButton!.innerText = backup;
           }, 1500);
         }
       });
     });
+
+    const fillCommentButton = document.createElement('button');
+    fillCommentButton.className = 'te_button';
+    fillCommentButton.innerText = 'Fill Comment';
+    fillCommentButton.style.marginRight = '8px';
+    fillCommentButton.addEventListener('click', function () {
+      const postTradeMessage = document.getElementById('postTradeMessage') as HTMLTextAreaElement | null;
+      if (postTradeMessage) {
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLTextAreaElement.prototype,
+          'value',
+        )?.set;
+        nativeSetter?.call(postTradeMessage, responseText);
+        postTradeMessage.dispatchEvent(new Event('input', { bubbles: true }));
+        postTradeMessage.dispatchEvent(new Event('change', { bubbles: true }));
+
+        const backup = fillCommentButton.innerText;
+        fillCommentButton.innerText = 'Filled!';
+        setTimeout(() => {
+          fillCommentButton.innerText = backup;
+        }, 1500);
+      }
+    });
+    wrapper.appendChild(fillCommentButton);
   }
 
   wrapper.appendChild(resubmitButton);
+
+  const receiptUrlLink = document.createElement('a');
+  receiptUrlLink.href = receiptUrl;
+  receiptUrlLink.target = '_blank';
+  receiptUrlLink.className = 't-blue h';
+  receiptUrlLink.innerText = receiptUrl;
+  receiptUrlLink.style.display = 'block';
+  receiptUrlLink.style.marginTop = '8px';
+  wrapper.appendChild(receiptUrlLink);
 
   const totalText = receipt.total.toString();
   copyTotalButton.addEventListener('click', function () {
