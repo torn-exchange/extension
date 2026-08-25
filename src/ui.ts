@@ -1,7 +1,7 @@
 import type { PriceData, Receipt } from './types';
 import { formatPrice, formatTemplateNumbers, formatValue, stripValue, writeToClipboard } from './format';
 import { fetchPrices, submitReceipt } from './api';
-import { getTradeItems, getSellerNameFromTradePage, getUsernameFromTradePage } from './dom-scrape';
+import { getTradeItems, tradeItemsMatch, getSellerNameFromTradePage, getUsernameFromTradePage } from './dom-scrape';
 import { getTradeId } from './page';
 
 interface TeState {
@@ -76,11 +76,59 @@ export function setup(): HTMLElement | null {
   return container;
 }
 
+let receiptWatcher: MutationObserver | null = null;
+let receiptWatcherTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function stopReceiptWatcher(): void {
+  if (receiptWatcherTimeout) {
+    clearTimeout(receiptWatcherTimeout);
+    receiptWatcherTimeout = null;
+  }
+  if (receiptWatcher) {
+    receiptWatcher.disconnect();
+    receiptWatcher = null;
+  }
+}
+
+function startReceiptWatcher(receipt: Receipt): void {
+  stopReceiptWatcher();
+
+  const tradeContainer = document.getElementById('trade-container');
+  if (!tradeContainer) {
+    return;
+  }
+
+  receiptWatcher = new MutationObserver(() => {
+    if (receiptWatcherTimeout) {
+      clearTimeout(receiptWatcherTimeout);
+    }
+    receiptWatcherTimeout = setTimeout(() => {
+      const liveTradeItems = getTradeItems();
+      if (
+        liveTradeItems &&
+        !tradeItemsMatch(liveTradeItems, {
+          items: receipt.priceData.items,
+          quantities: receipt.priceData.quantities,
+        })
+      ) {
+        stopReceiptWatcher();
+        showLookupButton(
+          'The trade items have changed since this receipt was generated. Look up prices again to create an up-to-date receipt.',
+        );
+      }
+    }, 300);
+  });
+
+  receiptWatcher.observe(tradeContainer, { childList: true, subtree: true, characterData: true });
+}
+
 export function showLoader(message = 'Loading'): void {
+  stopReceiptWatcher();
   getWrapper().innerHTML = `${message}`;
 }
 
 export function showLookupError(message: string): void {
+  stopReceiptWatcher();
   getWrapper().innerHTML = `
         <div>
             <span class="te_invalid_feedback" role="alert">
@@ -188,6 +236,8 @@ function updateTotals(): void {
 }
 
 export function renderPriceTable(priceData: PriceData, buyerName: string, sellerName: string): void {
+  stopReceiptWatcher();
+
   const table = document.createElement('table');
   table.className = 'te_table';
 
@@ -275,6 +325,8 @@ export function renderPriceTable(priceData: PriceData, buyerName: string, seller
 }
 
 export function renderReceipt(receipt: Receipt): void {
+  startReceiptWatcher(receipt);
+
   const wrapper = getWrapper();
   wrapper.innerHTML = `
         <div class="response">
@@ -402,13 +454,24 @@ export function renderReceipt(receipt: Receipt): void {
   });
 }
 
-export function showLookupButton(): void {
+export function showLookupButton(warningMessage?: string): void {
+  stopReceiptWatcher();
+
   const lookupButton = document.createElement('button');
   lookupButton.className = 'te_button';
   lookupButton.innerText = 'Lookup Prices';
 
   const wrapper = getWrapper();
   wrapper.innerHTML = '';
+
+  if (warningMessage) {
+    const warning = document.createElement('p');
+    warning.className = 'te_invalid_feedback';
+    warning.style.display = 'block';
+    warning.innerText = warningMessage;
+    wrapper.appendChild(warning);
+  }
+
   wrapper.appendChild(lookupButton);
 
   lookupButton.addEventListener('click', function () {

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.1
+
+- Fixed the trade panel showing a stale receipt (wrong item quantities) when the trade's items changed after the receipt was generated or fetched, e.g. after a trade was declined but not yet cancelled and the seller added more items. The panel now detects the mismatch and prompts a fresh price lookup instead.
+
 ## v1.1.0
 
 - Added a trader-status button to Torn profile pages (`profiles.php`) that shows a player's Torn Exchange status: whether they're an active trader, their votes/reviews, and a link to their price list.

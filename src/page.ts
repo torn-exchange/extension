@@ -1,6 +1,6 @@
 import { getApiKey, showApiKeyPrompt } from './auth';
 import { fetchReceiptByTradeId } from './api';
-import { getUsernameFromTradePage } from './dom-scrape';
+import { getTradeItems, tradeItemsMatch, getUsernameFromTradePage } from './dom-scrape';
 import { setup, showLookupButton, renderReceipt, showLoader, showLookupError, getWrapper, setSettingsHandler } from './ui';
 
 export function isTradePage(): boolean {
@@ -60,6 +60,14 @@ export function handleTradePage(): void {
     if (existingReceipt) {
       const meta = existingReceipt.meta;
       const data = existingReceipt.data;
+
+      const liveTradeItems = getTradeItems();
+      if (liveTradeItems && !tradeItemsMatch(liveTradeItems, { items: data.items, quantities: data.quantities })) {
+        showLookupButton(
+          'The trade items have changed since this receipt was generated. Look up prices again to create an up-to-date receipt.',
+        );
+        return;
+      }
 
       const priceData = {
         items: data.items,
