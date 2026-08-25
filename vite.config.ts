@@ -16,7 +16,7 @@ export default defineConfig({
         description:
           'TornExchange Helper Script for traders - finish trades and create trade receipts on the fly',
         license: 'MIT',
-        match: ['https://www.torn.com/trade.php*'],
+        match: ['https://www.torn.com/trade.php*', 'https://www.torn.com/profiles.php*'],
         icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
         'run-at': 'document-end',
         grant: ['GM_xmlhttpRequest', 'GM_addStyle', 'GM_setValue', 'GM_getValue'],
