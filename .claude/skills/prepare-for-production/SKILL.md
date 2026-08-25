@@ -28,22 +28,28 @@ If it fails, fix the reported issues (or ask the user how to proceed) before con
 
 Confirms the code compiles cleanly before touching the version number. If it fails, stop and report the errors.
 
-## 4. Bump the version
+## 4. Update the changelog
+
+Add an entry to `CHANGELOG.md` for the version this prep is bumping *to* (same version computed for the branch name in step 1), following the existing format (`## vX.Y.Z` heading, bullet list of user-facing changes). Base the bullets on what's actually in the diff/commits being shipped — don't invent changes.
+
+Commit the changelog update on its own (`git add CHANGELOG.md && git commit -m "..."`) *before* step 5 — `npm version` only bumps/commits `package.json`/`package-lock.json`, so the changelog needs its own commit or it'll be left uncommitted after the version bump.
+
+## 5. Bump the version
 
 Default to a **patch** bump unless the user's request says otherwise (e.g. "prepare for production, minor bump" → minor; mentions of breaking changes → ask, don't assume major).
 
 - `npm run release:patch` / `release:minor` / `release:major` — each of these runs `npm version <bump>` (updates `package.json`, which `vite.config.ts` reads for the userscript `@version`) and then rebuilds `dist/te-helper.user.js`.
 - Note `npm version` will itself try to create a git commit + tag by default. That's fine here since we're already on a dedicated release branch — just let it happen, don't pass `--no-git-tag-version`.
 
-## 5. Verify the build output
+## 6. Verify the build output
 
 Confirm `dist/te-helper.user.js` exists and its `@version` header (top of the file) matches the new `package.json` version. `dist/` is gitignored, so this file is never committed — it's the artifact to copy/paste manually.
 
-## 6. Commit
+## 7. Commit
 
-`npm version` in step 4 already created a commit (`vX.Y.Z`) and a tag for the `package.json`/`package-lock.json` change. Check `git status`/`git log -1` to confirm. If there were other staged changes from step 1 that weren't part of that commit, commit them separately with a normal descriptive message (see the repo's commit-message conventions in recent `git log`).
+`npm version` in step 5 already created a commit (`vX.Y.Z`) and a tag for the `package.json`/`package-lock.json` change. Check `git status`/`git log -1` to confirm. If there were other staged changes from step 1 that weren't part of that commit, commit them separately with a normal descriptive message (see the repo's commit-message conventions in recent `git log`).
 
-## 7. Report back to the user
+## 8. Report back to the user
 
 Summarize:
 - Branch name and whether it was newly created
