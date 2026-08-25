@@ -44,3 +44,15 @@ export interface Receipt {
   buyerName: string;
   sellerName: string;
 }
+
+export interface TeProfile {
+  name: string;
+  torn_id: string;
+  activity_status: string;
+  last_active: string;
+  created_at: string;
+  updated_at: string;
+  votes: number;
+  reviews: string;
+  active_trader: boolean;
+}

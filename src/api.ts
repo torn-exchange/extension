@@ -1,11 +1,11 @@
-import type { ExistingReceipt, PriceData, ReceiptResponse } from './types';
+import type { ExistingReceipt, PriceData, ReceiptResponse, TeProfile } from './types';
 import { getApiKey } from './auth';
 
 export const ENDPOINT = 'https://tornexchange.com';
 
 const REQUEST_TIMEOUT_MS = 15000;
 
-function safeJsonParse<T>(text: string): T | null {
+export function safeJsonParse<T>(text: string): T | null {
   try {
     return JSON.parse(text) as T;
   } catch {
@@ -78,6 +78,43 @@ export function fetchReceiptByTradeId(
     },
     onerror: function (error) {
       callback(error, null);
+    },
+    ontimeout: function () {
+      callback(new Error('Request timed out.'), null);
+    },
+  });
+}
+
+export interface ApiError extends Error {
+  apiMessage?: string;
+}
+
+export function fetchTeProfile(
+  userId: string,
+  callback: (error: ApiError | null, data: TeProfile | null) => void,
+): void {
+  GM_xmlhttpRequest({
+    method: 'GET',
+    url: ENDPOINT + '/api/profile?user_id=' + encodeURIComponent(userId) + '&key=' + encodeURIComponent(getApiKey() ?? ''),
+    timeout: REQUEST_TIMEOUT_MS,
+    onload: function (response) {
+      const parsed = safeJsonParse<{ status: string; message?: string; data?: TeProfile }>(
+        response.responseText,
+      );
+      if (!parsed) {
+        callback(new Error('Invalid response from server.'), null);
+        return;
+      }
+      if (parsed.status !== 'success' || !parsed.data) {
+        const err: ApiError = new Error(parsed.message || 'Unknown error');
+        err.apiMessage = parsed.message;
+        callback(err, null);
+        return;
+      }
+      callback(null, parsed.data);
+    },
+    onerror: function (error) {
+      callback(error as unknown as ApiError, null);
     },
     ontimeout: function () {
       callback(new Error('Request timed out.'), null);

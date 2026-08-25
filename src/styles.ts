@@ -160,4 +160,60 @@ export const CSS = `
         color: #89e1fb;
         cursor: pointer;
     }
+
+    .te_profile_button_icon {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+    }
+
+    .te_profile_button.te_profile_button_disabled .te_profile_button_icon,
+    .te_profile_button.te_profile_button_loading .te_profile_button_icon {
+        opacity: 0.35;
+        filter: grayscale(1);
+    }
+
+    .te_trader_info {
+        padding: 12px;
+        text-align: left;
+    }
+
+    .te_trader_info_stats {
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: #cccccc;
+    }
+
+    .te_trader_info_stats b {
+        color: #f7b84b;
+    }
+
+    .te_trader_info_actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .te_trader_info_actions .torn-btn {
+        flex: 1;
+        text-align: center;
+    }
+
+    .te_trader_info_actions .torn-btn.disable {
+        pointer-events: none;
+    }
+
+    .te_trader_info_row {
+        padding: 4px 0;
+        color: white;
+    }
+
+    .te_trader_info_row a {
+        color: #89e1fb;
+        text-decoration: none;
+    }
+
+    .te_trader_info_row a:hover {
+        text-decoration: underline;
+    }
 `;
