@@ -26,6 +26,35 @@ export function sanitizeItemName(itemName: string): string {
   return itemName.replace(TTregex, '').trim().replaceAll('\n', '');
 }
 
+export function tradeItemsMatch(a: TradeItems, b: TradeItems): boolean {
+  if (a.items.length !== b.items.length) {
+    return false;
+  }
+
+  const toMap = (t: TradeItems) => {
+    const map = new Map<string, number>();
+    for (let i = 0; i < t.items.length; i++) {
+      map.set(t.items[i], (map.get(t.items[i]) ?? 0) + t.quantities[i]);
+    }
+    return map;
+  };
+
+  const mapA = toMap(a);
+  const mapB = toMap(b);
+
+  if (mapA.size !== mapB.size) {
+    return false;
+  }
+
+  for (const [item, quantity] of mapA) {
+    if (mapB.get(item) !== quantity) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function getTradeItems(): TradeItems | null {
   const items: string[] = [];
   const quantities: number[] = [];
