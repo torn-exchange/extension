@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.2
+
+- Added a small "Accepted" badge (TE gold) next to a trade's description on the current-trades list (`trade.php#`) when you accepted that trade, since Torn doesn't show this on the list itself. Detected from the confirmation message shown after accepting/declining a trade.
+
 ## v1.1.1
 
 - Fixed the trade panel showing a stale receipt (wrong item quantities) when the trade's items changed after the receipt was generated or fetched, e.g. after a trade was declined but not yet cancelled and the seller added more items. The panel now detects the mismatch and prompts a fresh price lookup instead.
