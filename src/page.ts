@@ -2,6 +2,7 @@ import { getApiKey, showApiKeyPrompt } from './auth';
 import { fetchReceiptByTradeId } from './api';
 import { getTradeItems, tradeItemsMatch, getUsernameFromTradePage } from './dom-scrape';
 import { setup, showLookupButton, renderReceipt, showLoader, showLookupError, getWrapper, setSettingsHandler } from './ui';
+import { recordTradeAction, getTradeAction, formatTimeAgo } from './trade-status';
 
 export function isTradePage(): boolean {
   const hash = location.hash;
@@ -106,6 +107,81 @@ export function handlePage(): void {
       handleTradePage();
     }
   });
+}
+
+const TRADE_STATUS_BADGE_CLASS = 'te_trade_status_badge';
+
+// After accepting/declining, Torn navigates to a `step=accept2`/`step=decline`
+// hash and shows a one-line confirmation alert. Watch for it and persist the
+// outcome locally so the trades list (which Torn doesn't annotate) can show it.
+export function observeTradeConfirmation(): void {
+  function check(): void {
+    if (!/step=(accept2|decline)/.test(location.hash)) {
+      return;
+    }
+    const tradeId = getTradeId();
+    if (!tradeId) {
+      return;
+    }
+
+    observeElement('.msg.right-round', function (el) {
+      const text = el.textContent ?? '';
+      if (/accepted/i.test(text)) {
+        recordTradeAction(tradeId, 'accepted');
+      } else if (/declined/i.test(text)) {
+        recordTradeAction(tradeId, 'declined');
+      }
+    });
+  }
+
+  check();
+  window.addEventListener('hashchange', check);
+}
+
+function getTradeIdFromListItem(li: Element): string | null {
+  const href = li.querySelector('.view a[href]')?.getAttribute('href') ?? '';
+  const match = href.match(/ID=(\d+)/);
+  return match ? match[1] : null;
+}
+
+function annotateTradeListItem(li: Element): void {
+  const tradeId = getTradeIdFromListItem(li);
+  const descP = li.querySelector('.desc p');
+  if (!tradeId || !descP) {
+    return;
+  }
+
+  const existingBadge = descP.querySelector(`.${TRADE_STATUS_BADGE_CLASS}`);
+  const record = getTradeAction(tradeId);
+
+  if (!record || record.status !== 'accepted') {
+    existingBadge?.remove();
+    return;
+  }
+
+  const badge = existingBadge ?? document.createElement('span');
+  badge.className = TRADE_STATUS_BADGE_CLASS;
+  badge.textContent = `Accepted ${formatTimeAgo(record.timestamp)}`;
+  if (!existingBadge) {
+    descP.appendChild(badge);
+  }
+}
+
+function annotateTradesList(): void {
+  document.querySelectorAll('ul.trades-cont.current > li').forEach(annotateTradeListItem);
+}
+
+// Torn doesn't mark accepted trades on the list page itself, so we track
+// acceptance locally (via observeTradeConfirmation) and inject a badge here.
+export function observeTradesList(): void {
+  observeElement('ul.trades-cont.current', function (list) {
+    annotateTradesList();
+    const observer = new MutationObserver(() => annotateTradesList());
+    observer.observe(list, { childList: true });
+  });
+
+  window.addEventListener('hashchange', annotateTradesList);
+  setInterval(annotateTradesList, 30000);
 }
 
 const TE_URL_PATTERN = /https:\/\/tornexchange\.com\/\S+/g;

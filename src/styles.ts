@@ -216,4 +216,17 @@ export const CSS = `
     .te_trader_info_row a:hover {
         text-decoration: underline;
     }
+
+    .te_trade_status_badge {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        color: #f7b84b;
+        background-color: #f7b84b26;
+        border: 1px solid #f7b84b66;
+        vertical-align: middle;
+    }
 `;
