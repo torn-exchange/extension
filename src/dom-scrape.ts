@@ -27,10 +27,6 @@ export function sanitizeItemName(itemName: string): string {
 }
 
 export function tradeItemsMatch(a: TradeItems, b: TradeItems): boolean {
-  if (a.items.length !== b.items.length) {
-    return false;
-  }
-
   const toMap = (t: TradeItems) => {
     const map = new Map<string, number>();
     for (let i = 0; i < t.items.length; i++) {
@@ -42,6 +38,10 @@ export function tradeItemsMatch(a: TradeItems, b: TradeItems): boolean {
   const mapA = toMap(a);
   const mapB = toMap(b);
 
+  // Compare by aggregated name -> total quantity, not by row count. Torn lists
+  // weapons/armour as one row each (added individually), while a saved receipt
+  // stores same-named items as a single merged row, so raw lengths legitimately
+  // differ on big trades even when the trades are identical.
   if (mapA.size !== mapB.size) {
     return false;
   }

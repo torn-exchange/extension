@@ -1,8 +1,9 @@
-import type { PriceData, Receipt } from './types';
+import type { PriceData, Receipt, TradeItems } from './types';
 import { formatPrice, formatTemplateNumbers, formatValue, stripValue, writeToClipboard } from './format';
 import { fetchPrices, submitReceipt } from './api';
 import { getTradeItems, tradeItemsMatch, getSellerNameFromTradePage, getUsernameFromTradePage } from './dom-scrape';
 import { getTradeId } from './page';
+import { getSettings } from './settings';
 
 interface TeState {
   container: HTMLElement;
@@ -104,17 +105,13 @@ function startReceiptWatcher(receipt: Receipt): void {
     }
     receiptWatcherTimeout = setTimeout(() => {
       const liveTradeItems = getTradeItems();
-      if (
-        liveTradeItems &&
-        !tradeItemsMatch(liveTradeItems, {
-          items: receipt.priceData.items,
-          quantities: receipt.priceData.quantities,
-        })
-      ) {
+      if (liveTradeItems && !tradeItemsMatch(liveTradeItems, receipt.baselineItems)) {
+        console.warn('[te-helper] trade items changed since receipt', {
+          liveTradeItems,
+          baselineItems: receipt.baselineItems,
+        });
         stopReceiptWatcher();
-        showLookupButton(
-          'The trade items have changed since this receipt was generated. Look up prices again to create an up-to-date receipt.',
-        );
+        showChangedBanner();
       }
     }, 300);
   });
@@ -235,7 +232,12 @@ function updateTotals(): void {
   }
 }
 
-export function renderPriceTable(priceData: PriceData, buyerName: string, sellerName: string): void {
+export function renderPriceTable(
+  priceData: PriceData,
+  buyerName: string,
+  sellerName: string,
+  baselineItems: TradeItems,
+): void {
   stopReceiptWatcher();
 
   const table = document.createElement('table');
@@ -310,21 +312,32 @@ export function renderPriceTable(priceData: PriceData, buyerName: string, seller
           priceData,
           buyerName,
           sellerName,
+          baselineItems,
         });
       },
     );
   });
 
+  // On long trades the item table causes a lot of scrolling. When the setting is
+  // enabled and every price is already known (nothing for the trader to fix),
+  // drop the table into a fixed-height scroll box instead of expanding it fully.
+  const allPricesKnown = priceData.prices.length > 0 && priceData.prices.every((p) => p > 0);
+  const tableHost = document.createElement('div');
+  if (getSettings().collapseItems && allPricesKnown) {
+    tableHost.className = 'te_scroll';
+  }
+  tableHost.appendChild(table);
+
   const wrapper = getWrapper();
   wrapper.innerHTML = '';
   wrapper.appendChild(totalDiv);
-  wrapper.appendChild(table);
+  wrapper.appendChild(tableHost);
   wrapper.appendChild(submitButton);
 
   updateTotals();
 }
 
-export function renderReceipt(receipt: Receipt): void {
+export function renderReceipt(receipt: Receipt, itemsChanged = false): void {
   startReceiptWatcher(receipt);
 
   const wrapper = getWrapper();
@@ -354,7 +367,7 @@ export function renderReceipt(receipt: Receipt): void {
   resubmitButton.className = 'te_button_dark';
   resubmitButton.innerText = 'Resubmit';
   resubmitButton.addEventListener('click', function () {
-    renderPriceTable(receipt.priceData, receipt.buyerName, receipt.sellerName);
+    renderPriceTable(receipt.priceData, receipt.buyerName, receipt.sellerName, receipt.baselineItems);
   });
 
   wrapper.appendChild(copyTotalButton);
@@ -452,6 +465,73 @@ export function renderReceipt(receipt: Receipt): void {
       }
     });
   });
+
+  if (itemsChanged) {
+    showChangedBanner();
+  }
+}
+
+// Non-blocking notice shown above a receipt when the live trade no longer matches
+// the items the receipt was generated from. The receipt stays visible; the trader
+// decides whether to re-look-up. A fresh Submit always overrides the old receipt.
+export function showChangedBanner(): void {
+  const wrapper = getWrapper();
+  if (wrapper.querySelector('.te_changed_banner')) {
+    return;
+  }
+
+  const banner = document.createElement('div');
+  banner.className = 'te_changed_banner';
+
+  const text = document.createElement('span');
+  text.className = 'te_changed_banner_text';
+  text.innerText = 'Trade items look different from this receipt — look up prices again to refresh it.';
+
+  const lookupButton = document.createElement('button');
+  lookupButton.className = 'te_button';
+  lookupButton.innerText = 'Look Up Prices';
+  lookupButton.addEventListener('click', runLookup);
+
+  const dismiss = document.createElement('button');
+  dismiss.className = 'te_changed_banner_dismiss';
+  dismiss.setAttribute('aria-label', 'Dismiss');
+  dismiss.innerText = '×';
+  dismiss.addEventListener('click', function () {
+    banner.remove();
+  });
+
+  banner.appendChild(text);
+  banner.appendChild(lookupButton);
+  banner.appendChild(dismiss);
+  wrapper.insertBefore(banner, wrapper.firstChild);
+}
+
+export function runLookup(): void {
+  const trade = document.getElementById('trade-container');
+  if (!trade) {
+    showLookupError('No trade found on this page.');
+    return;
+  }
+
+  const tradeItems = getTradeItems();
+  if (!tradeItems) {
+    showLookupError('No items in trade or trade already finished.');
+    return;
+  }
+
+  const userName = getUsernameFromTradePage();
+  const sellerName = getSellerNameFromTradePage();
+
+  showLoader('Looking up prices...');
+
+  fetchPrices(tradeItems.items, tradeItems.quantities, sellerName, userName, function (error, priceData) {
+    if (error || !priceData) {
+      console.error('Error fetching prices:', error);
+      showLookupError('Unable to fetch prices.');
+      return;
+    }
+    renderPriceTable(priceData, priceData.buyer_name, priceData.seller_name, tradeItems);
+  });
 }
 
 export function showLookupButton(warningMessage?: string): void {
@@ -460,6 +540,7 @@ export function showLookupButton(warningMessage?: string): void {
   const lookupButton = document.createElement('button');
   lookupButton.className = 'te_button';
   lookupButton.innerText = 'Lookup Prices';
+  lookupButton.addEventListener('click', runLookup);
 
   const wrapper = getWrapper();
   wrapper.innerHTML = '';
@@ -473,32 +554,4 @@ export function showLookupButton(warningMessage?: string): void {
   }
 
   wrapper.appendChild(lookupButton);
-
-  lookupButton.addEventListener('click', function () {
-    const trade = document.getElementById('trade-container');
-    if (!trade) {
-      showLookupError('No trade found on this page.');
-      return;
-    }
-
-    const tradeItems = getTradeItems();
-    if (!tradeItems) {
-      showLookupError('No items in trade or trade already finished.');
-      return;
-    }
-
-    const userName = getUsernameFromTradePage();
-    const sellerName = getSellerNameFromTradePage();
-
-    showLoader('Looking up prices...');
-
-    fetchPrices(tradeItems.items, tradeItems.quantities, sellerName, userName, function (error, priceData) {
-      if (error || !priceData) {
-        console.error('Error fetching prices:', error);
-        showLookupError('Unable to fetch prices.');
-        return;
-      }
-      renderPriceTable(priceData, priceData.buyer_name, priceData.seller_name);
-    });
-  });
 }

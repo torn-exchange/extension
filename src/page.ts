@@ -32,7 +32,8 @@ export function observeElement(selector: string, callback: (element: Element) =>
 }
 
 function showSettings(): void {
-  showApiKeyPrompt(getWrapper(), handleTradePage, getApiKey());
+  // onCancel returns to the normal trade-page view (re-checks for a receipt).
+  showApiKeyPrompt(getWrapper(), handleTradePage, getApiKey(), handleTradePage);
 }
 
 export function handleTradePage(): void {
@@ -62,12 +63,13 @@ export function handleTradePage(): void {
       const meta = existingReceipt.meta;
       const data = existingReceipt.data;
 
+      // Never block on this — the existing receipt is always shown. If the live
+      // trade looks different, renderReceipt just adds a dismissible banner.
+      const baselineItems = { items: data.items, quantities: data.quantities };
       const liveTradeItems = getTradeItems();
-      if (liveTradeItems && !tradeItemsMatch(liveTradeItems, { items: data.items, quantities: data.quantities })) {
-        showLookupButton(
-          'The trade items have changed since this receipt was generated. Look up prices again to create an up-to-date receipt.',
-        );
-        return;
+      const itemsChanged = !!liveTradeItems && !tradeItemsMatch(liveTradeItems, baselineItems);
+      if (itemsChanged) {
+        console.warn('[te-helper] trade items differ from existing receipt', { liveTradeItems, baselineItems });
       }
 
       const priceData = {
@@ -81,14 +83,18 @@ export function handleTradePage(): void {
         buyer_id: undefined,
       };
 
-      renderReceipt({
-        receipt_id: meta.receipt_id,
-        total: meta.total,
-        trade_message: meta.trade_message,
-        priceData,
-        buyerName: getUsernameFromTradePage(),
-        sellerName: meta.seller,
-      });
+      renderReceipt(
+        {
+          receipt_id: meta.receipt_id,
+          total: meta.total,
+          trade_message: meta.trade_message,
+          priceData,
+          buyerName: getUsernameFromTradePage(),
+          sellerName: meta.seller,
+          baselineItems,
+        },
+        itemsChanged,
+      );
       return;
     }
 
