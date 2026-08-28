@@ -77,6 +77,64 @@ export const CSS = `
         padding:10px;
     }
 
+    .te_scroll {
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid #555555;
+        border-radius: 4px;
+    }
+
+    .te_changed_banner {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        background-color: #f7b84b26;
+        border: 1px solid #f7b84b66;
+        font-size: 13px;
+    }
+
+    .te_changed_banner_text {
+        color: #f7b84b;
+        font-weight: bold;
+    }
+
+    .te_changed_banner_dismiss {
+        background: transparent;
+        border: none;
+        color: #f7b84b;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 4px;
+    }
+
+    .te_settings_option {
+        margin-top: 12px;
+        font-size: 13px;
+    }
+
+    .te_settings_option label {
+        cursor: pointer;
+    }
+
+    .te_settings_option input {
+        margin-right: 6px;
+        vertical-align: middle;
+    }
+
+    .te_settings_actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
     .te_button {
         background-color: #f7b84b26;
         border-radius: 5px;

@@ -43,6 +43,9 @@ export interface Receipt {
   priceData: PriceData;
   buyerName: string;
   sellerName: string;
+  // Snapshot of the trade items this receipt was generated from, used only to
+  // show a soft "items changed" banner — never to block showing the receipt.
+  baselineItems: TradeItems;
 }
 
 export interface TeProfile {
