@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.3
+
+- The trade panel no longer blocks the receipt when it thinks the trade items changed. Large trades (many weapons/armour added one by one) were consistently hitting a false "trade items have changed" and hiding the receipt. The existing receipt is now always shown; if the live trade looks different, a dismissible banner offers a fresh price lookup, and submitting always overrides the old receipt.
+- Added a setting (cog icon) to collapse long item lists into a fixed-height scroll box instead of expanding the whole table, cutting down scrolling on big trades. Only applies when every price is already known; enabled by default.
+- Added a Cancel button to the settings/API-key panel so you can return to the main view without saving.
+
 ## v1.1.2
 
 - Added a small "Accepted" badge (TE gold) next to a trade's description on the current-trades list (`trade.php#`) when you accepted that trade, since Torn doesn't show this on the list itself. Detected from the confirmation message shown after accepting/declining a trade.
