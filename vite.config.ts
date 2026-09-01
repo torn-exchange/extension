@@ -19,7 +19,13 @@ export default defineConfig({
         match: ['https://www.torn.com/trade.php*', 'https://www.torn.com/profiles.php*'],
         icon: 'https://www.google.com/s2/favicons?sz=64&domain=torn.com',
         'run-at': 'document-end',
-        grant: ['GM_xmlhttpRequest', 'GM_addStyle', 'GM_setValue', 'GM_getValue'],
+        grant: [
+          'GM_xmlhttpRequest',
+          'GM_addStyle',
+          'GM_setValue',
+          'GM_getValue',
+          'GM_setClipboard',
+        ],
       },
       build: {
         fileName: 'te-helper.user.js',
