@@ -38,16 +38,28 @@ export function writeToClipboard(
   textToCopy: string,
   callback?: (error: unknown, message: string) => void,
 ): void {
+  // Prefer the userscript-manager clipboard API: it runs in the extension
+  // context, so it is not affected by page-level clipboard hijacking or by
+  // content-blocker scriptlets (e.g. uBlock Origin's "prevent-clipboard-write"
+  // ClickFix mitigation, which proxies page-context navigator.clipboard and
+  // has misfired on our copy buttons in the past).
+  if (typeof GM_setClipboard === 'function') {
+    try {
+      GM_setClipboard(textToCopy, 'text');
+      callback?.(null, 'Text copied to clipboard successfully.');
+      return;
+    } catch (err) {
+      callback?.(err, 'Failed to copy text to clipboard.');
+      return;
+    }
+  }
+
   navigator.clipboard
     .writeText(textToCopy)
     .then(() => {
-      if (callback) {
-        callback(null, 'Text copied to clipboard successfully.');
-      }
+      callback?.(null, 'Text copied to clipboard successfully.');
     })
     .catch((err) => {
-      if (callback) {
-        callback(err, 'Failed to copy text to clipboard.');
-      }
+      callback?.(err, 'Failed to copy text to clipboard.');
     });
 }
