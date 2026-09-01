@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.4
+
+- Copy buttons (Copy Total, Copy Receipt, Copy Receipt Message) now use the userscript manager's native clipboard API. They were being silently blocked on `trade.php` by uBlock Origin's ClickFix protection, which intercepts page-level clipboard writes — the button showed "Copied!" but nothing landed on the clipboard.
+
 ## v1.1.3
 
 - The trade panel no longer blocks the receipt when it thinks the trade items changed. Large trades (many weapons/armour added one by one) were consistently hitting a false "trade items have changed" and hiding the receipt. The existing receipt is now always shown; if the live trade looks different, a dismissible banner offers a fresh price lookup, and submitting always overrides the old receipt.
